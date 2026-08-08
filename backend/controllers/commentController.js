@@ -1,6 +1,6 @@
 const Comment = require('../models/Comment');
 const Task = require('../models/Task');
-
+const { emitTaskUpdate } = require('../socket/socketHandler');
 const add = async (req, res) => {
   try {
     const { text, taskId } = req.body;
@@ -25,8 +25,9 @@ const add = async (req, res) => {
       companyId: req.user.companyId,
     });
 
-    res.status(201).json(comment);
-  } catch (error) {
+    emitTaskUpdate(req.user.companyId, { comment, taskId });
+
+    res.status(201).json(comment);  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
