@@ -20,6 +20,9 @@ app.use('/api/projects', projectRoutes);
 const taskRoutes = require('./routes/taskRoutes');
 app.use('/api/tasks', taskRoutes);
 
+const commentRoutes = require('./routes/commentRoutes');
+app.use('/api/comments', commentRoutes);
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
