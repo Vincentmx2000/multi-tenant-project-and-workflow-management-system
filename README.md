@@ -33,6 +33,9 @@ Main Dashboard
 <img width="1896" height="905" alt="Dashboard" src="https://github.com/user-attachments/assets/4c1289f7-d887-487d-9fef-374ae008d354" />
 Activity Section
 <img width="1897" height="907" alt="Activity" src="https://github.com/user-attachments/assets/618c9408-1a38-4176-b5af-b3d31c5feb26" />
+Comments Section
+<img width="1896" height="901" alt="Comments" src="https://github.com/user-attachments/assets/34e974d5-3ebc-455f-8260-300c83a77c6b" />
+
 
 
 ## Features
