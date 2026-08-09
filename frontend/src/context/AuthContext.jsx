@@ -13,7 +13,24 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem('token') || null;
   });
 
+  const [companyDetails, setCompanyDetails] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCompanyMe = async () => {
+      if (token && user?.companyId) {
+        try {
+          const res = await api.get('/company/me');
+          setCompanyDetails(res.data);
+        } catch (err) {
+          // Silent fallback if endpoint fails
+        }
+      } else {
+        setCompanyDetails(null);
+      }
+    };
+    fetchCompanyMe();
+  }, [token, user?.companyId]);
 
   const login = async (email, password) => {
     setLoading(true);
@@ -60,14 +77,19 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
+    setCompanyDetails(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
+
+  const companyName = companyDetails?.name || user?.companyName || 'Company';
 
   const value = {
     user,
     token,
     company: user?.companyId,
+    companyName,
+    companyDetails,
     role: user?.role,
     isAuthenticated: !!token && !!user,
     loading,

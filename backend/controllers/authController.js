@@ -45,6 +45,7 @@ const register = async (req, res) => {
       role,
     });
 
+    const companyObj = await Company.findById(resolvedCompanyId);
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -54,6 +55,7 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         companyId: user.companyId,
+        companyName: companyObj?.name || 'Company',
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -82,6 +84,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    const companyObj = await Company.findById(user.companyId);
     const token = generateToken(user._id);
 
     res.json({
@@ -91,6 +94,7 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
         companyId: user.companyId,
+        companyName: companyObj?.name || 'Company',
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
