@@ -70,7 +70,6 @@ This app lets multiple companies use the same platform while keeping their data 
 | Database | MongoDB (Mongoose) |
 | Auth | JWT, bcrypt |
 | Real-Time | Socket.IO |
-| Validation | express-validator |
 
 ---
 
