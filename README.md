@@ -18,31 +18,37 @@ A full-stack MERN application for managing projects and tasks across multiple co
 This app lets multiple companies use the same platform while keeping their data completely isolated from one another. Within each company, four roles (Owner, Admin, Manager, Member) control what actions a user can take, and teams manage work through a live-updating Kanban board.
 
 ---
-## Sample Screens
-Login Page
-<img width="1917" height="907" alt="Login " src="https://github.com/user-attachments/assets/0fc447ae-c828-4b17-8184-1873437763c2" />
-Register Page
-<img width="1918" height="902" alt="Register" src="https://github.com/user-attachments/assets/7d61c425-c267-4f19-a447-9f8353ecc2bf" />
-Tasks Page
-<img width="1897" height="906" alt="Tasks" src="https://github.com/user-attachments/assets/deb369b1-61d8-413d-9b8a-207e9aa807a3" />
-Projects Page
-<img width="1918" height="907" alt="Projects" src="https://github.com/user-attachments/assets/f320f7c0-b139-4fe6-8fd5-3d06c34f8c04" />
-Notification Page
-<img width="1900" height="906" alt="Notification" src="https://github.com/user-attachments/assets/02e3d64c-dd99-466f-b8bb-fc3f141db9bb" />
-Main Dashboard
-<img width="1896" height="905" alt="Dashboard" src="https://github.com/user-attachments/assets/4c1289f7-d887-487d-9fef-374ae008d354" />
-Activity Section
-<img width="1897" height="907" alt="Activity" src="https://github.com/user-attachments/assets/618c9408-1a38-4176-b5af-b3d31c5feb26" />
-Comments Section
-<img width="1896" height="901" alt="Comments" src="https://github.com/user-attachments/assets/34e974d5-3ebc-455f-8260-300c83a77c6b" />
 
+## Screenshots
 
+| Login | Register |
+|---|---|
+| <img width="960" alt="Login" src="https://github.com/user-attachments/assets/0fc447ae-c828-4b17-8184-1873437763c2" /> | <img width="960" alt="Register" src="https://github.com/user-attachments/assets/7d61c425-c267-4f19-a447-9f8353ecc2bf" /> |
+
+| Dashboard | Projects |
+|---|---|
+| <img width="960" alt="Dashboard" src="https://github.com/user-attachments/assets/4c1289f7-d887-487d-9fef-374ae008d354" /> | <img width="960" alt="Projects" src="https://github.com/user-attachments/assets/f320f7c0-b139-4fe6-8fd5-3d06c34f8c04" /> |
+
+| Kanban Board | Team Management |
+|---|---|
+| <img width="960" alt="Tasks" src="https://github.com/user-attachments/assets/deb369b1-61d8-413d-9b8a-207e9aa807a3" /> | <img width="960" alt="Team" src="https://github.com/user-attachments/assets/c267425d-5303-46ff-b610-ed8e2c7fe6c6" /> |
+
+| Activity Log | Comments |
+|---|---|
+| <img width="960" alt="Activity" src="https://github.com/user-attachments/assets/618c9408-1a38-4176-b5af-b3d31c5feb26" /> | <img width="960" alt="Comments" src="https://github.com/user-attachments/assets/34e974d5-3ebc-455f-8260-300c83a77c6b" /> |
+
+| Notifications |
+|---|
+| <img width="960" alt="Notification" src="https://github.com/user-attachments/assets/02e3d64c-dd99-466f-b8bb-fc3f141db9bb" /> |
+
+---
 
 ## Features
 
 - **JWT Authentication** — register/login with protected routes
 - **Role-Based Access Control** — Owner, Admin, Manager, Member, each with distinct permissions, enforced server-side
 - **Multi-Tenancy** — every record is scoped to a `companyId`; users can only ever access their own company's data
+- **Team Management** — Owner can view all company members and assign/change roles directly in the app, no database access required
 - **Project Management** — create, update, delete projects with members, status, and deadlines
 - **Task Management** — create and assign tasks with priority, status, due date, and labels
 - **Kanban Board** — drag-and-drop status updates with persistent state (`PATCH /tasks/:id/status`)
@@ -64,6 +70,7 @@ Comments Section
 | Database | MongoDB (Mongoose) |
 | Auth | JWT, bcrypt |
 | Real-Time | Socket.IO |
+| Validation | express-validator |
 
 ---
 
@@ -71,6 +78,7 @@ Comments Section
 
 | Action | Owner | Admin | Manager | Member |
 |---|---|---|---|---|
+| Assign/change team roles | ✅ | ❌ | ❌ | ❌ |
 | Create/delete project | ✅ | ✅ | ❌ | ❌ |
 | Create/assign task | ✅ | ✅ | ✅ | ❌ |
 | Update task status (Kanban) | ✅ | ✅ | ✅ | ✅ |
@@ -80,7 +88,6 @@ Comments Section
 Permissions are enforced by backend middleware (`checkRole`), not just hidden in the UI — verified via direct API testing with role-restricted tokens.
 
 ---
-
 
 ## Getting Started
 
@@ -146,7 +153,7 @@ This creates one company ("Seed Test Co") with a user per role:
 | manager@seed.com | test1234 | Manager |
 | member@seed.com | test1234 | Member |
 
-The script is idempotent — safe to re-run, it skips any account that already exists.
+The script is idempotent — safe to re-run, it skips any account that already exists. Once logged in as `owner@seed.com`, use the **Team** page to promote or demote any of the other seeded users.
 
 ---
 
@@ -158,9 +165,8 @@ Every collection (`Project`, `Task`, `Comment`, `ActivityLog`, `Notification`) s
 
 ## Known Limitations
 
-- There is no in-app "invite teammate / assign role" UI. New users can register as the **Owner** of a new company, or as a **Member** of an existing company (via Company ID). Promoting a Member to Admin or Manager currently requires a direct database update — this was a deliberate scope decision given the assessment timeline, not an oversight; the task spec requires roles to exist and be enforced, not a full team-management interface.
-- Admin currently has identical permissions to Owner. In a production version, Admin would likely be scoped slightly below Owner (e.g., unable to delete the company itself or remove the Owner).
-- IP access on the MongoDB Atlas cluster is currently open (`0.0.0.0/0`) for development and deployment convenience. In production, this would be scoped to specific server IPs.
+- **Admin** currently has identical permissions to **Owner** for project/task actions. Only role-assignment (the Team page) is restricted to Owner alone, to keep one clear authority for changing permissions. In a production version, Admin's scope would likely be narrowed further (e.g., unable to remove the Owner or delete the company).
+- MongoDB Atlas network access is currently open (`0.0.0.0/0`) for development and deployment convenience. In production, this would be scoped to specific server IPs.
 
 ---
 
@@ -169,20 +175,21 @@ Every collection (`Project`, `Task`, `Comment`, `ActivityLog`, `Notification`) s
 ```
 project-root/
 ├── backend/
-│   ├── config/       # DB connection
-│   ├── models/        # Mongoose schemas
-│   ├── middleware/    # Auth, role checks, validation, error handling
-│   ├── controllers/   # Route logic
-│   ├── routes/        # Express routers
-│   ├── utils/         # Helpers (JWT, activity logging, notifications)
-│   ├── socket/         # Socket.IO handler
+│   ├── config/         # DB connection
+│   ├── models/         # Mongoose schemas
+│   ├── middleware/     # Auth, role checks, validation, error handling
+│   ├── controllers/    # Route logic
+│   ├── routes/         # Express routers
+│   ├── utils/          # Helpers (JWT, activity logging, notifications)
+│   ├── socket/          # Socket.IO handler
+│   ├── seed.js          # Test account generator (all 4 roles)
 │   └── server.js
 │
 └── frontend/
     └── src/
         ├── api/         # Axios instance
         ├── context/     # Auth + Socket context
-        ├── components/  # Kanban, tasks, projects, dashboard, layout
+        ├── components/  # Kanban, tasks, projects, dashboard, team, layout
         ├── pages/       # Route-level views
         └── routes/      # Protected route wrapper
 ```
