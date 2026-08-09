@@ -35,4 +35,21 @@ const markRead = async (req, res) => {
   }
 };
 
-module.exports = { getMine, markRead };
+const markAllRead = async (req, res) => {
+  try {
+    await Notification.updateMany(
+      {
+        userId: req.user._id,
+        companyId: req.user.companyId,
+        read: false,
+      },
+      { read: true }
+    );
+
+    res.json({ message: 'All notifications marked as read' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getMine, markRead, markAllRead };
