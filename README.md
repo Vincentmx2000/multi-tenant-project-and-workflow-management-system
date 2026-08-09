@@ -79,25 +79,6 @@ Permissions are enforced by backend middleware (`checkRole`), not just hidden in
 
 ---
 
-## Screenshots
-
-| Login | Register |
-|---|---|
-| ![Login](screenshots/login.png) | ![Register](screenshots/register.png) |
-
-| Dashboard | Projects |
-|---|---|
-| ![Dashboard](screenshots/dashboard.png) | ![Projects](screenshots/projects.png) |
-
-| Kanban Board | Notifications |
-|---|---|
-| ![Kanban Board](screenshots/kanban-board.png) | ![Notifications](screenshots/notifications.png) |
-
-| Activity Log |
-|---|
-| ![Activity Log](screenshots/activity-log.png) |
-
----
 
 ## Getting Started
 
