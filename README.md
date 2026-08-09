@@ -64,7 +64,6 @@ Comments Section
 | Database | MongoDB (Mongoose) |
 | Auth | JWT, bcrypt |
 | Real-Time | Socket.IO |
-| Validation | express-validator |
 
 ---
 
