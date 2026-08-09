@@ -1,7 +1,10 @@
 const Task = require('../models/Task');
 const Project = require('../models/Project');
 const createNotification = require('../utils/createNotification');
-const { emitTaskUpdate, emitNewNotification } = require('../socket/socketHandler');const create = async (req, res) => {
+const logActivity = require('../utils/logActivity');
+const { emitTaskUpdate, emitNewNotification } = require('../socket/socketHandler');
+
+const create = async (req, res) => {
   try {
     const {
       title,
@@ -51,8 +54,16 @@ const { emitTaskUpdate, emitNewNotification } = require('../socket/socketHandler
 
     emitTaskUpdate(req.user.companyId, task);
 
+    await logActivity({
+      companyId: req.user.companyId,
+      projectId: task.projectId,
+      userId: req.user._id,
+      action: `Task created: ${task.title}`,
+    });
+
     res.status(201).json(task);
-  } catch (error) {    res.status(500).json({ message: error.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -166,7 +177,8 @@ const update = async (req, res) => {
     emitTaskUpdate(req.user.companyId, task);
 
     res.json(task);
-  } catch (error) {    res.status(500).json({ message: error.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -204,7 +216,62 @@ const updateStatus = async (req, res) => {
 
     emitTaskUpdate(req.user.companyId, task);
 
-    res.json(task);  } catch (error) {
+    await logActivity({
+      companyId: req.user.companyId,
+      projectId: task.projectId,
+      userId: req.user._id,
+      action: `Task "${task.title}" status updated to ${status}`,
+    });
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const assign = async (req, res) => {
+  try {
+    const { assignedTo } = req.body;
+
+    const existingTask = await Task.findOne({
+      _id: req.params.id,
+      companyId: req.user.companyId,
+    });
+
+    if (!existingTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    const task = await Task.findOneAndUpdate(
+      { _id: req.params.id, companyId: req.user.companyId },
+      { assignedTo },
+      { new: true, runValidators: true }
+    );
+
+    if (
+      assignedTo &&
+      assignedTo.toString() !== req.user._id.toString()
+    ) {
+      const notification = await createNotification({
+        companyId: req.user.companyId,
+        userId: assignedTo,
+        message: `You have been assigned to task: ${task.title}`,
+        type: 'assignment',
+      });
+      emitNewNotification(req.user.companyId, notification);
+    }
+
+    emitTaskUpdate(req.user.companyId, task);
+
+    await logActivity({
+      companyId: req.user.companyId,
+      projectId: task.projectId,
+      userId: req.user._id,
+      action: `Task "${task.title}" assigned`,
+    });
+
+    res.json(task);
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
@@ -226,4 +293,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { create, getAll, getOne, update, updateStatus, remove };
+module.exports = { create, getAll, getOne, update, updateStatus, assign, remove };

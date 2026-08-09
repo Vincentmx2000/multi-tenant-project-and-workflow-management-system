@@ -28,6 +28,12 @@ app.use('/api/comments', commentRoutes);
 const notificationRoutes = require('./routes/notificationRoutes');
 app.use('/api/notifications', notificationRoutes);
 
+const activityRoutes = require('./routes/activityRoutes');
+app.use('/api/activities', activityRoutes);
+
+const dashboardRoutes = require('./routes/dashboardRoutes');
+app.use('/api/dashboard', dashboardRoutes);
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });

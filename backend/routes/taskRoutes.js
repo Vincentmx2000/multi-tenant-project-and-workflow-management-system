@@ -9,6 +9,7 @@ const {
   getOne,
   update,
   updateStatus,
+  assign,
   remove,
 } = require('../controllers/taskController');
 
@@ -19,6 +20,7 @@ router.use(authMiddleware);
 router.post('/', checkRole(['Owner', 'Admin', 'Manager']), createRules, validate, create);
 router.get('/', getAll);
 router.patch('/:id/status', updateStatus);
+router.patch('/:id/assign', checkRole(['Owner', 'Admin', 'Manager']), assign);
 router.get('/:id', getOne);
 router.put('/:id', checkRole(['Owner', 'Admin', 'Manager']), updateRules, validate, update);
 router.delete('/:id', checkRole(['Owner', 'Admin', 'Manager']), remove);

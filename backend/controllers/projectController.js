@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const logActivity = require('../utils/logActivity');
 
 const create = async (req, res) => {
   try {
@@ -12,6 +13,13 @@ const create = async (req, res) => {
       members,
       companyId: req.user.companyId,
       createdBy: req.user._id,
+    });
+
+    await logActivity({
+      companyId: req.user.companyId,
+      projectId: project._id,
+      userId: req.user._id,
+      action: `Project created: ${project.title}`,
     });
 
     res.status(201).json(project);
@@ -75,6 +83,13 @@ const update = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
+    await logActivity({
+      companyId: req.user.companyId,
+      projectId: project._id,
+      userId: req.user._id,
+      action: `Project updated: ${project.title}`,
+    });
+
     res.json(project);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -91,6 +106,13 @@ const remove = async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
+
+    await logActivity({
+      companyId: req.user.companyId,
+      projectId: project._id,
+      userId: req.user._id,
+      action: `Project deleted: ${project.title}`,
+    });
 
     res.json({ message: 'Project deleted' });
   } catch (error) {
