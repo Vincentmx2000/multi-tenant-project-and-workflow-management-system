@@ -78,6 +78,7 @@ const getAll = async (req, res) => {
     if (req.query.status) filter.status = req.query.status;
     if (req.query.priority) filter.priority = req.query.priority;
     if (req.query.assignedTo) filter.assignedTo = req.query.assignedTo;
+    if (req.query.projectId) filter.projectId = req.query.projectId;
 
     const [data, total] = await Promise.all([
       Task.find(filter).skip(skip).limit(limit),
