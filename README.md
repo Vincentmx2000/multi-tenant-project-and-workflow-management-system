@@ -1,6 +1,6 @@
 # Multi-Tenant Project & Workflow Management System
 
-A full-stack **TypeScript** (MERN) application for managing projects and tasks across multiple companies (tenants), with role-based access control, a real-time Kanban board, and activity tracking.
+A full-stack (MERN) application for managing projects and tasks across multiple companies (tenants), with role-based access control, a real-time Kanban board, and activity tracking.
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
@@ -18,7 +18,6 @@ A full-stack **TypeScript** (MERN) application for managing projects and tasks a
 
 This app lets multiple companies use the same platform while keeping their data completely isolated from one another. Within each company, four roles (Owner, Admin, Manager, Member) control what actions a user can take, and teams manage work through a live-updating Kanban board.
 
-The entire codebase — backend and frontend — is written in **strict TypeScript** (`strict: true`, `noImplicitAny`, `strictNullChecks`), with 0 type errors on build.
 
 ---
 
