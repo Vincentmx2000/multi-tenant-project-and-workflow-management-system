@@ -14,10 +14,18 @@ A full-stack (MERN) application for managing projects and tasks across multiple 
 
 ---
 
+## Live Demo
+
+- **App:** [https://multi-tenant-project-and-workflow-m.vercel.app](https://multi-tenant-project-and-workflow-m.vercel.app)
+- **API:** [https://multi-tenant-project-and-workflow.onrender.com](https://multi-tenant-project-and-workflow.onrender.com)
+
+> The API is hosted on Render's free tier, which spins down after 15 minutes of inactivity — the first request after idle time may take 30–50 seconds to wake up. Use the seeded test accounts below to log in quickly.
+
+---
+
 ## Overview
 
 This app lets multiple companies use the same platform while keeping their data completely isolated from one another. Within each company, four roles (Owner, Admin, Manager, Member) control what actions a user can take, and teams manage work through a live-updating Kanban board.
-
 
 ---
 
@@ -73,6 +81,7 @@ This app lets multiple companies use the same platform while keeping their data 
 | Database | MongoDB (Mongoose) |
 | Auth | JWT, bcrypt |
 | Real-Time | Socket.IO |
+| Hosting | Vercel (frontend), Render (backend), MongoDB Atlas (database) |
 
 ---
 
@@ -157,7 +166,7 @@ App runs at `http://localhost:5173`, API at `http://localhost:5000`.
 
 ## Test Accounts (Seed Script)
 
-To quickly test all four roles without manually registering each one:
+To quickly test all four roles without manually registering each one — works against the live demo too if you point `MONGODB_URI` at the same Atlas cluster:
 ```bash
 cd backend
 npm run seed
@@ -188,6 +197,7 @@ At the type level, `AuthenticatedRequest` guarantees `req.user.companyId` is a n
 
 - **Admin** currently has identical permissions to **Owner** for project/task actions. Only role-assignment (the Team page) is restricted to Owner alone, to keep one clear authority for changing permissions. In a production version, Admin's scope would likely be narrowed further (e.g., unable to remove the Owner or delete the company).
 - MongoDB Atlas network access is currently open (`0.0.0.0/0`) for development and deployment convenience. In production, this would be scoped to specific server IPs.
+- The Render free tier spins down after inactivity, so the live API may take up to a minute to respond to the first request after idle time.
 
 ---
 
