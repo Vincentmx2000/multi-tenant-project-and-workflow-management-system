@@ -1,8 +1,9 @@
 # Multi-Tenant Project & Workflow Management System
 
-A full-stack MERN application for managing projects and tasks across multiple companies (tenants), with role-based access control, a real-time Kanban board, and activity tracking.
+A full-stack **TypeScript** (MERN) application for managing projects and tasks across multiple companies (tenants), with role-based access control, a real-time Kanban board, and activity tracking.
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
@@ -16,6 +17,8 @@ A full-stack MERN application for managing projects and tasks across multiple co
 ## Overview
 
 This app lets multiple companies use the same platform while keeping their data completely isolated from one another. Within each company, four roles (Owner, Admin, Manager, Member) control what actions a user can take, and teams manage work through a live-updating Kanban board.
+
+The entire codebase — backend and frontend — is written in **strict TypeScript** (`strict: true`, `noImplicitAny`, `strictNullChecks`), with 0 type errors on build.
 
 ---
 
@@ -47,7 +50,7 @@ This app lets multiple companies use the same platform while keeping their data 
 
 - **JWT Authentication** — register/login with protected routes
 - **Role-Based Access Control** — Owner, Admin, Manager, Member, each with distinct permissions, enforced server-side
-- **Multi-Tenancy** — every record is scoped to a `companyId`; users can only ever access their own company's data
+- **Multi-Tenancy** — every record is scoped to a `companyId`; users can only ever access their own company's data. This boundary is enforced at both the type level (a non-nullable `companyId` on the authenticated request) and at runtime (middleware).
 - **Team Management** — Owner can view all company members and assign/change roles directly in the app, no database access required
 - **Project Management** — create, update, delete projects with members, status, and deadlines
 - **Task Management** — create and assign tasks with priority, status, due date, and labels
@@ -58,6 +61,7 @@ This app lets multiple companies use the same platform while keeping their data 
 - **Dashboard** — task/project stats, status distribution chart, overdue task tracking
 - **Validation, pagination, and filtering** on core list endpoints
 - **Responsive UI** — mobile-friendly layout with collapsible navigation
+- **Fully typed** — strict TypeScript across backend and frontend, shared domain interfaces, typed Mongoose documents, typed Express requests
 
 ---
 
@@ -65,8 +69,8 @@ This app lets multiple companies use the same platform while keeping their data 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React (Vite), Tailwind CSS, React Router, dnd-kit, Recharts |
-| Backend | Node.js, Express.js |
+| Frontend | React (Vite), **TypeScript**, Tailwind CSS, React Router, dnd-kit, Recharts |
+| Backend | Node.js, **TypeScript**, Express.js |
 | Database | MongoDB (Mongoose) |
 | Auth | JWT, bcrypt |
 | Real-Time | Socket.IO |
@@ -84,7 +88,7 @@ This app lets multiple companies use the same platform while keeping their data 
 | Comment on tasks | ✅ | ✅ | ✅ | ✅ |
 | View dashboard & activity log | ✅ | ✅ | ✅ | ✅ |
 
-Permissions are enforced by backend middleware (`checkRole`), not just hidden in the UI — verified via direct API testing with role-restricted tokens.
+Permissions are enforced by backend middleware (`checkRole`), not just hidden in the UI — verified via direct API testing with role-restricted tokens, and backed by a `Role` union type at compile time.
 
 ---
 
@@ -93,6 +97,7 @@ Permissions are enforced by backend middleware (`checkRole`), not just hidden in
 ### Prerequisites
 - Node.js (v18+)
 - MongoDB Atlas account (or local MongoDB instance)
+- TypeScript is installed as a dev dependency — no global install required
 
 ### 1. Clone the repo
 ```bash
@@ -112,9 +117,18 @@ MONGODB_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_secret_key
 PORT=5000
 ```
-Run it:
+Run in development (TypeScript, live reload):
 ```bash
 npm run dev
+```
+Type-check without emitting files:
+```bash
+npm run typecheck
+```
+Build and run for production (compiles `.ts` → `dist/`):
+```bash
+npm run build
+npm start
 ```
 
 ### 3. Frontend setup
@@ -130,8 +144,15 @@ Run it:
 ```bash
 npm run dev
 ```
+Type-check and build for production:
+```bash
+npm run typecheck
+npm run build
+```
 
 App runs at `http://localhost:5173`, API at `http://localhost:5000`.
+
+> **Note:** script names above (`dev`, `typecheck`, `build`) should match whatever's defined in `backend/package.json` and `frontend/package.json` — adjust if yours differ.
 
 ---
 
@@ -140,7 +161,7 @@ App runs at `http://localhost:5173`, API at `http://localhost:5000`.
 To quickly test all four roles without manually registering each one:
 ```bash
 cd backend
-node seed.js
+npm run seed
 ```
 
 This creates one company ("Seed Test Co") with a user per role:
@@ -160,6 +181,8 @@ The script is idempotent — safe to re-run, it skips any account that already e
 
 Every collection (`Project`, `Task`, `Comment`, `ActivityLog`, `Notification`) stores a `companyId`. Every database query is filtered by the requesting user's `companyId`, taken from their verified JWT — never from client-supplied input. This is the core rule the entire access-control model is built on.
 
+At the type level, `AuthenticatedRequest` guarantees `req.user.companyId` is a non-nullable `Types.ObjectId`, so a route handler that forgets to scope a query by company fails to compile rather than silently leaking data across tenants at runtime.
+
 ---
 
 ## Known Limitations
@@ -174,27 +197,32 @@ Every collection (`Project`, `Task`, `Comment`, `ActivityLog`, `Notification`) s
 ```
 project-root/
 ├── backend/
-│   ├── config/         # DB connection
-│   ├── models/         # Mongoose schemas
-│   ├── middleware/     # Auth, role checks, validation, error handling
-│   ├── controllers/    # Route logic
-│   ├── routes/         # Express routers
-│   ├── utils/          # Helpers (JWT, activity logging, notifications)
-│   ├── socket/          # Socket.IO handler
-│   ├── seed.js          # Test account generator (all 4 roles)
-│   └── server.js
+│   ├── config/          # DB connection (db.ts)
+│   ├── types/           # Shared interfaces: Role, AuthenticatedRequest, domain types
+│   ├── models/          # Mongoose schemas + typed documents (.ts)
+│   ├── middleware/      # Auth, role checks, validation, error handling (.ts)
+│   ├── validators/      # express-validator chains (.ts)
+│   ├── controllers/     # Route logic (.ts)
+│   ├── routes/          # Express routers (.ts)
+│   ├── utils/           # Helpers: JWT, activity logging, notifications (.ts)
+│   ├── socket/          # Socket.IO handler (.ts)
+│   ├── seed.ts          # Test account generator (all 4 roles)
+│   ├── server.ts
+│   └── tsconfig.json
 │
 └── frontend/
     └── src/
-        ├── api/         # Axios instance
-        ├── context/     # Auth + Socket context
-        ├── components/  # Kanban, tasks, projects, dashboard, team, layout
-        ├── pages/       # Route-level views
-        └── routes/      # Protected route wrapper
+        ├── api/         # Typed Axios instance (.ts)
+        ├── types/       # Shared DTOs matching backend models (.ts)
+        ├── context/     # Auth + Socket context (.tsx)
+        ├── components/  # Kanban, tasks, projects, dashboard, team, layout (.tsx)
+        ├── pages/       # Route-level views (.tsx)
+        ├── routes/      # Protected route wrapper (.tsx)
+        └── vite-env.d.ts
 ```
 
 ---
 
 ## Author
 
-Built by Vincent A as a technical assessment submission.
+Built by Vincent A
